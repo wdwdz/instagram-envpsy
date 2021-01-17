@@ -1,6 +1,8 @@
-setwd("~/R Scripts/instagram/data")
+setwd("~/Github/instagram-envpsy/data")
 library(tidyverse)
 library(plyr)
+library(emmeans)
+
 
 df.roster<- read.csv("roster.csv",header = T)
 df.s1<-read.csv("survey1.csv", header = T)
@@ -48,9 +50,13 @@ df.s1.sc<-df.s1.sc[!duplicated(df.s1.sc$Q15),]
 df.combine<-merge(df.s3.sc, df.s2.sc, by = "Q15",all.x = TRUE)
 df.combine.sc<-left_join(df.combine, df.s1.sc, by = "Q15",all.x = TRUE)
 
-
+# we created a new csv based on the data above
+# from here, we can use df.new as the raw data and remove other dataframes
+# we add another 3 columns to indicate the instagram followers, following, and condition
+# we may only filter the subjects whose condition is 3 as they are real participants
 # df.combine.sc is the dataframes contain treatment, social presence and cognitive presence.
 # Below are did models using the full data in one model.
+# firstly, lets look at the social presence
 df.new<-read.csv("participants_details.csv",header = T)
 colnames(df.new)[1]<-"netid"
 
@@ -62,6 +68,13 @@ social_tidy<-df.combine.s %>%
 model.soc.did<- lmerTest::lmer(data=social_tidy,socialp~group*time+(1|netid))
 summary(model.soc.did)
 
+emmeans(model.soc.did, specs = trt.vs.ctrlk ~ group * time)
+
+
+
+
+
+
 df.combine.c<-subset(df.new,select = c(netid,cog1,cog2,cog3,group,condition)) 
 cog_tidy<-df.combine.c %>% 
   filter(condition==3) %>% 
@@ -69,10 +82,6 @@ cog_tidy<-df.combine.c %>%
 
 model.cog.did<- lmerTest::lmer(data=cog_tidy,cogp~group*time+(1|netid))
 summary(model.cog.did)
-
-
-
-
 
 
 
