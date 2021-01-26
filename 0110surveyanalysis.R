@@ -57,9 +57,16 @@ df.combine.sc<-left_join(df.combine, df.s1.sc, by = "Q15",all.x = TRUE)
 # df.combine.sc is the dataframes contain treatment, social presence and cognitive presence.
 # Below are did models using the full data in one model.
 # firstly, lets look at the social presence
+
+
+
+
 df.new<-read.csv("participants_details.csv",header = T)
 colnames(df.new)[1]<-"netid"
 
+################THIS PART WE USE ONE MODEL
+###########################################
+view(social_tidy)
 df.combine.s<-subset(df.new,select = c(netid,soc1,soc2,soc3,group,condition)) 
 social_tidy<-df.combine.s %>% 
   filter(condition==3) %>% 
@@ -68,11 +75,16 @@ social_tidy<-df.combine.s %>%
 model.soc.did<- lmerTest::lmer(data=social_tidy,socialp~group*time+(1|netid))
 summary(model.soc.did)
 
-emmeans(model.soc.did, specs = trt.vs.ctrlk ~ group * time)
-
-
-
-
+social.emm<-emmeans(model.soc.did, specs =  ~ group * time)
+#predicted test score for each group in each test
+#write down the order list here
+emmip(model.soc.did, group ~ time,CIs = TRUE)
+#model.emm<-emmeans(0 = T2S2 - T2S1  + T3S2 - T3S1  - 2*T1S2 + 2*T1S1)
+LF<-contrast(social.emm,
+             list(CMO = c(2, -1, -1, -2, 1, 1, 0, 0, 0))
+  
+)
+LF
 
 
 df.combine.c<-subset(df.new,select = c(netid,cog1,cog2,cog3,group,condition)) 
@@ -82,8 +94,12 @@ cog_tidy<-df.combine.c %>%
 
 model.cog.did<- lmerTest::lmer(data=cog_tidy,cogp~group*time+(1|netid))
 summary(model.cog.did)
+emmip(model.cog.did, group ~ time,CIs = TRUE)
 
 
+
+#################################################
+#################################################
 
 df.combine.s<-subset(df.combine.sc,select = c(Q15,soc1,soc2,soc3,group))
 df.combine.s$group<-as.factor(df.combine.s$group)
