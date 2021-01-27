@@ -66,26 +66,64 @@ colnames(df.new)[1]<-"netid"
 
 ################THIS PART WE USE ONE MODEL
 ###########################################
-view(social_tidy)
+#social presence
 df.combine.s<-subset(df.new,select = c(netid,soc1,soc2,soc3,group,condition)) 
 social_tidy<-df.combine.s %>% 
   filter(condition==3) %>% 
   pivot_longer(c(soc3,soc2,soc1), names_to = 'time', values_to = 'socialp') 
-
+#DID model
 model.soc.did<- lmerTest::lmer(data=social_tidy,socialp~group*time+(1|netid))
 summary(model.soc.did)
-
 social.emm<-emmeans(model.soc.did, specs =  ~ group * time)
+#check the coding order of the emmeans
+social.emm
 #predicted test score for each group in each test
 #write down the order list here
 emmip(model.soc.did, group ~ time,CIs = TRUE)
-#model.emm<-emmeans(0 = T2S2 - T2S1  + T3S2 - T3S1  - 2*T1S2 + 2*T1S1)
+#test1(0 = T2S2 - T2S1  + T3S2 - T3S1  - 2*T1S2 + 2*T1S1)
 LF<-contrast(social.emm,
-             list(CMO = c(2, -1, -1, -2, 1, 1, 0, 0, 0))
-  
-)
+             list(CMO = c(2, -1, -1, -2, 1, 1, 0, 0, 0)))
+LF
+#test2((t1s2-t1s1)-(t2s2-t2s1)=0)
+LF<-contrast(social.emm,
+             list(CMO = c(-1,1,0,1,-1,0, 0, 0, 0)))
+LF
+#test3((t1s2-t1s1)-(t3s2-t3s1)=0)
+LF<-contrast(social.emm,
+             list(CMO = c(-1,0,1,1,0,-1, 0, 0, 0)))
+LF
+#test4
+LF<-contrast(social.emm,
+             list(CMO = c(-1,-1,2,1,1,-2, 0, 0, 0)))
+LF
+#test5
+LF<-contrast(social.emm,
+             list(CMO = c(0,1,0,0,-2, 0, 0,1,0)))
 LF
 
+#test6
+LF<-contrast(social.emm,
+             list(CMO = c(0,0,1,0,0,-2, 0,0,1)))
+LF
+
+#test7
+LF<-contrast(social.emm,
+             list(CMO = c(0,1,1,0,-2,-2, 0,1,1)))
+LF
+#test8
+LF<-contrast(social.emm,
+             list(CMO = c(0,0,0,2,-1,-1, -2,1,1)))
+LF
+#test9
+LF<-contrast(social.emm,
+             list(CMO = c(0,0,0,1,-1,0, -1,1,0)))
+LF
+
+
+
+
+
+#cognitive presence
 
 df.combine.c<-subset(df.new,select = c(netid,cog1,cog2,cog3,group,condition)) 
 cog_tidy<-df.combine.c %>% 
@@ -95,9 +133,25 @@ cog_tidy<-df.combine.c %>%
 model.cog.did<- lmerTest::lmer(data=cog_tidy,cogp~group*time+(1|netid))
 summary(model.cog.did)
 emmip(model.cog.did, group ~ time,CIs = TRUE)
-
-
-
+cog.emm<-emmeans(model.cog.did, specs =  ~ group * time)
+#check the coding order of the emmeans
+cog.emm
+#test1
+LF<-contrast(cog.emm,
+             list(CMO = c(0, -1, 1, 0, 1, -1, 0, 0, 0)))
+LF
+#test2
+LF<-contrast(cog.emm,
+             list(CMO = c(0, 0, 0, 1, 0, -1, -1, 0, 1)))
+LF
+#test3
+LF<-contrast(cog.emm,
+             list(CMO = c(0, 0, 1, 0, 0, -2, 0, 0, 1)))
+LF
+#test4
+LF<-contrast(cog.emm,
+             list(CMO = c(-1, -1, 2, 1, 1, -2, 0, 0, 0)))
+LF
 #################################################
 #################################################
 
